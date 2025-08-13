@@ -1,0 +1,23 @@
+@import 'tailwindcss';
+
+@font-face {
+  font-family: 'Minecraft';
+  src: url('skinview3d/assets/minecraft.woff2') format('woff2');
+}
+
+:root {
+  font-family: 'Minecraft';
+  @apply bg-stone-950 text-white;
+}
+
+button {
+  @apply bg-stone-800 text-white p-2 rounded border-2 border-stone-800;
+
+  &:hover {
+    @apply bg-stone-700;
+  }
+
+  &[data-active=true] {
+    @apply border-stone-700;
+  }
+}
