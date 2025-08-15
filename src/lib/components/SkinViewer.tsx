@@ -18,7 +18,7 @@ class LookAtCameraAnimation extends IdleAnimation {
   }
 
   protected animate(player: PlayerObject): void {
-    super.animate(player)
+    super.animate(player);
     const head = player.skin.head;
     head.rotation.set(0, 0, 0);
     head.lookAt(this.instance.camera.position);
@@ -45,7 +45,7 @@ export default function SkinViewer({ skin }: Props) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const instanceRef = React.useRef<_SkinViewer | null>(null);
   const [currentAnimation, setCurrentAnimation] =
-    React.useState<AnimationType>('look at camera');
+    React.useState<AnimationType>('idle');
   const [autoRotate, setAutoRotate] = React.useState(true);
 
   React.useEffect(() => {
