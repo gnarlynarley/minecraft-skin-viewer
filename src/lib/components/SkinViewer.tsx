@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  SkinViewer as _SkinViewer,
+  SkinViewer,
   WalkingAnimation,
   IdleAnimation,
   RunningAnimation,
@@ -10,9 +10,9 @@ import {
 } from 'skinview3d';
 
 class LookAtCameraAnimation extends IdleAnimation {
-  instance: _SkinViewer;
+  instance: SkinViewer;
 
-  constructor(instance: _SkinViewer) {
+  constructor(instance: SkinViewer) {
     super();
     this.instance = instance;
   }
@@ -29,6 +29,7 @@ type Props = {
   skin: string;
 };
 type AnimationType = (typeof animations)[number];
+type ModelType = (typeof modelTypes)[number];
 
 const animations = [
   'idle',
@@ -37,20 +38,23 @@ const animations = [
   'wave',
   'fly',
   'look at camera',
-];
+] as const;
+const modelTypes = ['classic', 'slim'] as const;
 
-export default function SkinViewer({ skin }: Props) {
+export default function SkinViewerComponent({ skin }: Props) {
   const [name, setName] = React.useState('');
   const containerRef = React.useRef<HTMLDivElement>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
-  const instanceRef = React.useRef<_SkinViewer | null>(null);
+  const instanceRef = React.useRef<SkinViewer | null>(null);
   const [currentAnimation, setCurrentAnimation] =
     React.useState<AnimationType>('idle');
+  const [currentModelType, setCurrentModelType] =
+    React.useState<ModelType>('classic');
   const [autoRotate, setAutoRotate] = React.useState(true);
 
   React.useEffect(() => {
     const canvas = canvasRef.current!;
-    const instance = new _SkinViewer({
+    const instance = new SkinViewer({
       canvas,
       width: 300,
       height: 300,
@@ -72,8 +76,10 @@ export default function SkinViewer({ skin }: Props) {
   React.useEffect(() => {
     const instance = instanceRef.current;
     if (!instance) return;
-    instance.loadSkin(skin);
-  }, [skin]);
+    instance.loadSkin(skin, {
+      model: currentModelType === 'slim' ? 'slim' : 'default',
+    });
+  }, [skin, currentModelType]);
 
   React.useEffect(() => {
     const instance = instanceRef.current;
@@ -142,7 +148,7 @@ export default function SkinViewer({ skin }: Props) {
       >
         <canvas
           ref={canvasRef}
-          className="absolute top-0 left-0 w-full! h-full! object-contain"
+          className="absolute top-0 left-0 w-full! h-full! object-contain select-none"
         />
       </div>
       <div className="flex flex-col gap-2">
@@ -155,6 +161,18 @@ export default function SkinViewer({ skin }: Props) {
             data-active={animation === currentAnimation}
           >
             {animation}
+          </button>
+        ))}
+
+        <p>Model type</p>
+        {modelTypes.map((modelType) => (
+          <button
+            key={modelType}
+            type="button"
+            onClick={() => setCurrentModelType(modelType)}
+            data-active={modelType === currentModelType}
+          >
+            {modelType}
           </button>
         ))}
 
