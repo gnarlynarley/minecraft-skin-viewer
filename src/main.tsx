@@ -4,6 +4,14 @@ import App from './App.tsx';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <React.Suspense
+      fallback={
+        <div className="h-screen w-screen flex items-center justify-center">
+          <h1>loading</h1>
+        </div>
+      }
+    >
+      <App />
+    </React.Suspense>
   </React.StrictMode>
 );

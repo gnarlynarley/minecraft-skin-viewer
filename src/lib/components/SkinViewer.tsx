@@ -39,7 +39,15 @@ const animations = [
   'fly',
   'look at camera',
 ] as const;
-const modelTypes = ['classic', 'slim'] as const;
+const modelTypes = ['auto', 'classic', 'slim'] as const;
+const modelTypesMap = {
+  auto: 'auto-detect',
+  classic: 'default',
+  slim: 'slim',
+} satisfies Record<
+  (typeof modelTypes)[number],
+  'default' | 'slim' | 'auto-detect'
+>;
 
 export default function SkinViewerComponent({ skin }: Props) {
   const [name, setName] = React.useState('');
@@ -49,8 +57,9 @@ export default function SkinViewerComponent({ skin }: Props) {
   const [currentAnimation, setCurrentAnimation] =
     React.useState<AnimationType>('idle');
   const [currentModelType, setCurrentModelType] =
-    React.useState<ModelType>('classic');
+    React.useState<ModelType>('auto');
   const [autoRotate, setAutoRotate] = React.useState(true);
+  const [lights, setLights] = React.useState(false);
 
   React.useEffect(() => {
     const canvas = canvasRef.current!;
@@ -69,6 +78,20 @@ export default function SkinViewerComponent({ skin }: Props) {
   }, []);
 
   React.useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const ac = new AbortController();
+
+    container.addEventListener('pointerdown', () => {
+      setAutoRotate(false);
+    });
+
+    return () => {
+      ac.abort();
+    };
+  }, []);
+
+  React.useEffect(() => {
     const instance = instanceRef.current;
     if (!instance) return;
   }, []);
@@ -77,7 +100,7 @@ export default function SkinViewerComponent({ skin }: Props) {
     const instance = instanceRef.current;
     if (!instance) return;
     instance.loadSkin(skin, {
-      model: currentModelType === 'slim' ? 'slim' : 'default',
+      model: modelTypesMap[currentModelType],
     });
   }, [skin, currentModelType]);
 
@@ -117,6 +140,18 @@ export default function SkinViewerComponent({ skin }: Props) {
     if (!instance) return;
     instance.autoRotate = autoRotate;
   }, [autoRotate]);
+
+  React.useEffect(() => {
+    const instance = instanceRef.current;
+    if (!instance) return;
+    if (lights) {
+      instance.globalLight.intensity = 1;
+      instance.cameraLight.intensity = 3000;
+    } else {
+      instance.globalLight.intensity = 3;
+      instance.cameraLight.intensity = 0;
+    }
+  }, [lights]);
 
   React.useEffect(() => {
     const instance = instanceRef.current;
@@ -184,6 +219,16 @@ export default function SkinViewerComponent({ skin }: Props) {
           data-active={autoRotate}
         >
           {autoRotate ? 'enabled' : 'disabled'}
+        </button>
+
+        <p>Lights</p>
+        <button
+          onClick={() => {
+            setLights((p) => !p);
+          }}
+          data-active={lights}
+        >
+          {lights ? 'enabled' : 'disabled'}
         </button>
 
         <input
